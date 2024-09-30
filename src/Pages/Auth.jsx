@@ -1,8 +1,96 @@
 import React, { useState } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { registerAPI } from '../Services/AllApi';
+import { Bounce, ToastContainer, toast } from 'react-toastify';
+  import 'react-toastify/dist/ReactToastify.css';
+  
 
 function Auth({ register }) {
+  console.log(register);
+  
+
+    
+  
+
+  const [userData,setUserData]=useState({ 
+
+    username:"",
+    email:"",
+    password:"",
+
+
+
+
+  })
+
+   console.log(userData);
+   
+
+const handleRegister=async()=>{
+
+  const {username,email,password}=userData
+  if(!username || !email || !password){
+    toast.info('Please fill the form', {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      transition: Bounce,
+      })
+
+
+
+}else{
+
+  const response = await registerAPI(userData)
+  console.log(response);
+  if(response.status==201){
+    toast.success('Registered  Successfully', {
+
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      transition: Bounce,
+      })
+  setUserData({username:'',email:'',password:''})
+  
+  
+  
+
+
+}else{ 
+  toast.warn(response.response.data, {
+    position: "top-center",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+    transition: Bounce,
+    });
+    
+}
+
+
+
+}
+}
+
+
+
+
   return (
     <div>
       <Container fluid className="d-flex justify-content-center align-items-center vh-100">
@@ -28,20 +116,20 @@ function Auth({ register }) {
 
               {register && (
                 <Form.Group controlId="formConfirmPassword">
-                  <Form.Control className='my-3' type="text" placeholder="User Name" />
+                  <Form.Control onChange={(e)=>setUserData({...userData,username:e.target.value})} className='my-3' type="text" placeholder="User Name" />
                 </Form.Group>
               )}
 
               <Form>
-                <Form.Group controlId="formBasicEmail">
+                <Form.Group onChange={(e)=>setUserData({...userData,email:e.target.value})} controlId="formBasicEmail">
                   <Form.Control className='my-3' type="email" placeholder="Email" />
                 </Form.Group>
 
-                <Form.Group controlId="formBasicPassword">
+                <Form.Group onChange={(e)=>setUserData({...userData,password:e.target.value})} controlId="formBasicPassword">
                   <Form.Control type="password" placeholder="Password" />
                 </Form.Group>
 
-                <Button variant="warning" className="w-100 mt-3" type="submit">
+                <Button onClick={handleRegister} variant="warning" className="w-100 mt-3">
                   {register ? 'Sign Up' : 'Login'}
                 </Button>
 
@@ -63,6 +151,23 @@ function Auth({ register }) {
           </Col>
         </Row>
       </Container>
+                    
+
+      <ToastContainer
+position="bottom-center"
+autoClose={5000}
+hideProgressBar={false}
+newestOnTop={false}
+closeOnClick
+rtl={false}
+pauseOnFocusLoss
+draggable
+pauseOnHover
+theme="dark"
+/>
+
+
+
     </div>
   );
 }
