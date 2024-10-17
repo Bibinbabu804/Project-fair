@@ -1,95 +1,138 @@
 import React, { useState } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { registerAPI } from '../Services/AllApi';
+import { Link, useNavigate } from 'react-router-dom';
+import { registerAPI, loginAPI } from '../Services/AllApi';  // Ensure loginAPI is imported
 import { Bounce, ToastContainer, toast } from 'react-toastify';
-  import 'react-toastify/dist/ReactToastify.css';
-  
+import 'react-toastify/dist/ReactToastify.css';
+import Spinner from 'react-bootstrap/Spinner';
 
 function Auth({ register }) {
-  console.log(register);
-  
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(false); // To control the spinner
+  const navigate = useNavigate();
 
-    
-  
+  const [userData, setUserData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
 
-  const [userData,setUserData]=useState({ 
+  const handleRegister = async () => {
+    const { username, email, password } = userData;
+    if (!username || !email || !password) {
+      toast.info('Please fill the form', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        transition: Bounce,
+      });
+    } else {
+      setLoading(true);  // Start showing the spinner
+      const response = await registerAPI(userData);
+      setLoading(false);  // Hide the spinner after response
 
-    username:"",
-    email:"",
-    password:"",
+      if (response.status >= 200 && response.status <= 300) {
+        toast.success('Registered Successfully', {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
 
+        setTimeout(() => {
+          navigate('/login');
+        }, 4000);
 
+        setUserData({ username: '', email: '', password: '' });
+      } else {
+        toast.warn(response.response.data, {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
+      }
+    }
+  };
 
+  const handleLogin = async () => {
+    const { email, password } = userData;
+    if (!email || !password) {
+      toast.info('Please fill the form', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        transition: Bounce,
+      });
+    } else {
+      setLoading(true);  // Start showing the spinner
+      const response = await loginAPI(userData);
 
-  })
+      setTimeout(() => {
+        
+        setLoading(false);  // Stop showing the spinner
+      }, 4000);
+      
+      
+      // Hide the spinner after response
 
-   console.log(userData);
-   
+      if (response.status >= 200 && response.status <= 300) {
+        setIsLoggedIn(true);
+        toast.success('Login Successful', {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
 
-const handleRegister=async()=>{
+        sessionStorage.setItem("user", JSON.stringify(response.data.user));
+        sessionStorage.setItem("token", response.data.token);
 
-  const {username,email,password}=userData
-  if(!username || !email || !password){
-    toast.info('Please fill the form', {
-      position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-      transition: Bounce,
-      })
+        setTimeout(() => {
+          navigate('/');
+        }, 3000);
 
-
-
-}else{
-
-  const response = await registerAPI(userData)
-  console.log(response);
-  if(response.status==201){
-    toast.success('Registered  Successfully', {
-
-      position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-      transition: Bounce,
-      })
-  setUserData({username:'',email:'',password:''})
-  
-  
-  
-
-
-}else{ 
-  toast.warn(response.response.data, {
-    position: "top-center",
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "colored",
-    transition: Bounce,
-    });
-    
-}
-
-
-
-}
-}
-
-
-
+        setUserData({ username: '', email: '', password: '' });
+      } else {
+        toast.warn(response.response.data, {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
+      }
+    }
+  };
 
   return (
     <div>
@@ -116,21 +159,35 @@ const handleRegister=async()=>{
 
               {register && (
                 <Form.Group controlId="formConfirmPassword">
-                  <Form.Control onChange={(e)=>setUserData({...userData,username:e.target.value})} className='my-3' type="text" placeholder="User Name" />
+                  <Form.Control
+                    onChange={(e) => setUserData({ ...userData, username: e.target.value })}
+                    className='my-3'
+                    type="text"
+                    placeholder="Username"
+                  />
                 </Form.Group>
               )}
 
               <Form>
-                <Form.Group onChange={(e)=>setUserData({...userData,email:e.target.value})} controlId="formBasicEmail">
+                <Form.Group onChange={(e) => setUserData({ ...userData, email: e.target.value })} controlId="formBasicEmail">
                   <Form.Control className='my-3' type="email" placeholder="Email" />
                 </Form.Group>
 
-                <Form.Group onChange={(e)=>setUserData({...userData,password:e.target.value})} controlId="formBasicPassword">
+                <Form.Group onChange={(e) => setUserData({ ...userData, password: e.target.value })} controlId="formBasicPassword">
                   <Form.Control type="password" placeholder="Password" />
                 </Form.Group>
 
-                <Button onClick={handleRegister} variant="warning" className="w-100 mt-3">
-                  {register ? 'Sign Up' : 'Login'}
+                <Button
+                  onClick={register ? handleRegister : handleLogin}
+                  variant="warning"
+                  className="w-100 mt-3"
+                  disabled={loading}  // Disable the button while loading
+                >
+                  {loading ? (
+                    <Spinner animation="border" size="sm" />
+                  ) : (
+                    register ? 'Sign Up' : 'Login'
+                  )}
                 </Button>
 
                 <p className="mt-3 text-center">
@@ -151,23 +208,19 @@ const handleRegister=async()=>{
           </Col>
         </Row>
       </Container>
-                    
 
       <ToastContainer
-position="bottom-center"
-autoClose={5000}
-hideProgressBar={false}
-newestOnTop={false}
-closeOnClick
-rtl={false}
-pauseOnFocusLoss
-draggable
-pauseOnHover
-theme="dark"
-/>
-
-
-
+        position="bottom-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 }

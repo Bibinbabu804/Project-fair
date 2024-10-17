@@ -8,12 +8,16 @@ import Auth from './Pages/Auth'
 import DashBoard from './Pages/DashBoard'
 import Projects from './Pages/Projects'
 import PageNotFound from './Pages/PageNotFound'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 function App() {
 
 
   return (
     <>
+    <ToastContainer/>
 
     <Header/>
 

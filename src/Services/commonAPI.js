@@ -2,7 +2,7 @@ import axios from 'axios'
 
 //api fetching congiguration=> get,put post,delete etc....
 export const commonAPI = async(httpMethod,url,reqBody,reqHeader)=>{
-//add register => method post , url=> localhost:300/data  , data=> ..username,enail , password url
+//add register => method post , url=> localhost:3000/data  , data=> ..username,enail , password url
 let  reqConfig = {
 
 method:httpMethod,
